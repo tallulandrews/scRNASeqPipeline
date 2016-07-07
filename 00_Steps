@@ -1,0 +1,39 @@
+Setup:
+0_BuildGenome.sh
+(1) Get appropriate genome & annotations. 
+	-> from local ensembl mirror? : mysql -u anonymous -h ensembldb.internal.sanger.ac.uk
+	-> simpler to just get from ftp site 
+(2) get these in the right format and put on lustre and stripe them. (/lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES) 
+	-> stripe at the level of directory (see wiki):
+		lfs setstripe <directory> -c -1 (number not letter) stripe across all **This is what I have done for this directory
+		lfs setstripe <directory? -c 1 (number not letter) stripe across single OST
+
+Initial QC : 
+0_FASTQC_Streaming.sh : FASTQC run on each end of each lane efficiently by streaming the data rather than combining the files then running on the bigger files.
+
+Mapping Reads: Tophat or STAR? -> STAR seems to be better in all ways except for the number of people already using it, it is both faster and maps more reads successfully. It is also possible to make the output compatible with Cufflinks
+(1) Copy data in processable chunks to /lustre/scratch108/compgen/team218  (1_break..., 1_Break...)
+	-> Q: What is the appropriate size chunk? (run in a few hours)
+	-> Should sort by lane & cellID while breaking down. Use 0_Gather_Summary_Statistics.pl as a basis
+	-> need to maintain ordering for paired-end reads.
+(2) submit jobs to cluster -> use job array, output into "output.%J.%I" or something like that
+	-> probably want to start with 40 jobs at a time until know how to load genome data efficiently
+(3) check results succeeded combined results as necessary & compress (compress while still on lustre it is faster)
+(4) move combined-compressed output back to /nfs/team218/
+(5) remove input chunks & deal with logfiles from lustre and repeat with next set
+--> Question? One or two passes of STAR? -> I think only one pass because we aren't that interested in alternative splicing and since relatively low read depth for each cell rare alternative splice forms are unlikely to be quantifiable in many samples. Thus the costs of doing the second pass - filtering novel splice junctions then re-building the genome to include them as annotations - outweigh the benefits of doing so - allowing more reads to be mapped to novel splice junctions.
+--> Question? what state does data have to be in for cufflinks/express? -> not going to use express since it doesn't do novel transcript assembly so would have to run cufflinks anyway. Cufflinks requires: Sorted SAM/BAM with special strand field and no soft clipping, the special strand field can be added with the appropriate parameter/argument in STAR calls, and I have an awk command from : https://groups.google.com/forum/#!searchin/rna-star/cufflinks/rna-star/Ta1Z2u4bPfc/8nZ2iMkxSyMJ to remove soft clipping.
+(6) Sort SAM/BAM
+(7) Remove duplicates (can be done with STAR once alignments have been combined & sorted) -> easier to do it with samtools (4_MergeBAMs.pl)
+
+Post-Mapping QC:
+3_Compile_Mapping_Statistics.pl Gather mapping statistics from STAR log files
+4_DO_RSeQC_Multiple.sh Various QC things using RSeQC -> general statistics, rRNA content, GC, Gene Body converage, splice junction saturation
+
+
+
+Calculating Abundance  cufflinks vs eXpress: eXpress is much faster but unclear which is more accurate. I'm not sure whether eXpress does de novo transcript assembly though..... need to look at documentations for eXpress. eXpress does not do de novo transcript assembly. Cufflinks does de novo transcript assembly and produces 95% CIs for FPKM, therefore forget eXpress I'm only going to use Cufflinks (assuming it doesn't take forever).
+(1) Build novel transcripts/gene-models using all data. -> Cufflinks!
+(2) Calculate abundance for each cell by mapping to the combination of novel transcripts & existing annotations. 
+
+
