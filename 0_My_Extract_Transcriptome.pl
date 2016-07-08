@@ -76,11 +76,15 @@ while (<$fa>) {
 				print $fa_out $Ensg2Seq{$ensg}."\n";
 				my $seq_length = length($Ensg2Seq{$ensg});
 				my $old_gtf = $Ensg2Gtf{$ensg};
+				$old_gft =~ s/transcript_id "(.+?)"/transcript_id "$ensg"/;
 				my @record = split(/\t/, $old_gtf);
 				$record[0] = $ensg;
 				$record[3] = 1;
 				$record[4] = $seq_length-1;
 				print $gtf_out join("\t",@record);
+
+				my $lastele = scalar(@record)-1;
+				$record[$lastele] = "gene_id \"$ensg\"; transcript_id \"$ensg\"; exon_number \"1\"; gene_name \"$ensg\"\n";
 				$record[2] = "exon";
 				print $gtf_out join("\t",@record);
 			}
