@@ -99,19 +99,19 @@ fi
 		# can the fasta just be added to the stock & gtf just concatenated to the current one? 
 		# -> yes as long as names are consistent across the files and not the same as any other chromosome/contig
 
+gunzip $FA
+FA=${FA%.*}
+gunzip $GTF
+GTF=${GTF%.*}
 if [ ! -z "$ADDDIR" ] ; then
-  gunzip $FA
-  FA=${FA%.*}
   echo "Adding files from $ADDDIR"
   cat $ADDDIR/*.fa >> $FA
-  gunzip $GTF
-  GTF=${GTF%.*}
   cat $ADDDIR/*.gtf >> $GTF
 fi
 
 if [ $NUMTHREADS -gt 0 ] ; then
   # Step 3: Run STAR on the finished genome & put output in striped directory.
-  $STAR --runThreadN $NUMTHREADS --runMode genomeGenerate --genomeDir /lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES --genomeFastaFiles $FA --sjdbGTFfile $GTF --sjdbOverhang $OVERHANG
+  $STAR --runThreadN $NUMTHREADS --runMode genomeGenerate --genomeDir /lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES --genomeFastaFiles $FA --sjdbGTFfile $GTF --sjdbOverhang $OVERHANG --limitGenomeGenerateRAM 30000000000
 
   # Step 4: delete the Ensembl-derived files
 #  rm $FA
