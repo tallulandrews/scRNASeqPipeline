@@ -19,7 +19,7 @@ STAR=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/STAR-STAR_2.4.0j/bin/Linux_x86
 PARAMFILE=$4
 PREFIX="$5-$LSB_JOBINDEX-"
 WORKINGDIR=/lustre/scratch108/compgen/team218/TA/TemporaryFileDir/$PREFIX
-GENOME=/lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES
+GENOME=/lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES/NeuronsLiora
 
 #Check appropriate arguments
 if [ ! -f "$STAR" ] ; then

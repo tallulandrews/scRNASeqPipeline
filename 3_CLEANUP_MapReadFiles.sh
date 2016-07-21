@@ -3,8 +3,8 @@
 # Run this after mapping is finished.
 
 # These must be consistent with 2_DO_MapReadsFile.sh
-OUTPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/FilesMapped
-TAG="TRIMMED-NeuronsEmmyLiora_Transcriptome"
+OUTPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunMapped
+TAG="Trimmed-Rerun_NeuronsEmmy"
 
 rm $OUTPUTDIR/*Log.progress.out
 

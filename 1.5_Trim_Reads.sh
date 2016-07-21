@@ -27,4 +27,5 @@ FILEnopath=`basename ${INPUTFILE%.fq}`
 OUTPUTFILE="$OUTPUTDIR/TRIMMED-$FILEnopath.fq"
 
 export _JAVA_OPTIONS="-Xmx1000M -XX:MaxHeapSize=1000m"
-java -jar $TRIMMER SE -phred33 $INPUTFILE $OUTPUTFILE ILLUMINACLIP:/nfs/users/nfs_t/ta6/RNASeqPipeline/software/Trimmomatic-0.36/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:20
+#java -jar $TRIMMER SE -phred33 $INPUTFILE $OUTPUTFILE ILLUMINACLIP:/nfs/users/nfs_t/ta6/RNASeqPipeline/software/Trimmomatic-0.36/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:20
+java -jar $TRIMMER SE -phred33 $INPUTFILE $OUTPUTFILE ILLUMINACLIP:/nfs/users/nfs_t/ta6/RNASeqPipeline/software/Trimmomatic-0.36/adapters/NexteraPE-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:50

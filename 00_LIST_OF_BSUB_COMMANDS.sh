@@ -2,6 +2,10 @@
 ORGANISM="Mmus"
 RUNNINGDIR=`pwd`
 
+#### Create GTF & FA for construct
+/nfs/users/nfs_t/ta6/RNASeqPipeline/0_GBK2FASTA.pl
+/nfs/users/nfs_t/ta6/RNASeqPipeline/software/cufflinks-2.2.1.Linux_x86_64/gffread --help
+
 #-----------------------------------------------------------------
 # Initial QC
 # This is not generalized

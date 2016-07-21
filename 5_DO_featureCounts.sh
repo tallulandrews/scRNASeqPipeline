@@ -1,13 +1,13 @@
 #!/bin/bash
 
-INPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/FilesDedupped
+INPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunDedup
 INPUTFILES=($INPUTDIR/*.bam)
 NUMFILES=${#INPUTFILES[@]}
 MAXJOBS=$NUMFILES
-OUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/FilesCounted
+OUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunCount
 TMPDIR=/lustre/scratch108/compgen/team218/TA/Pipeline_RunningDir/FeatureCounts
 mkdir -p $OUTDIR
-ANNOTATIONgtf="/lustre/scratch108/compgen/team218/TA/genomebuilding/Transcripts_featureCounts.gtf"
+ANNOTATIONgtf="/lustre/scratch108/compgen/team218/TA/genomebuilding/Nascent_Transcripts.gtf"
 featureCOUNT=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/subread-1.4.6-p2-Linux-x86_64/bin/featureCounts
 NUMTHREADS=1
 
@@ -49,4 +49,4 @@ fi
 # -B : only reads with both ends mapping considered
 # -C : reads with ends mapping to different Chrs excluded
 
-bsub -J"featurecountsjobarray[1-$MAXJOBS]%50" -R"select[mem>5000] rusage[mem=5000]" -M5000 -q normal -o FCoutput.%J.%I /nfs/users/nfs_t/ta6/RNASeqPipeline/5_featureCounts_wrapper.sh $ANNOTATIONgtf $NUMTHREADS $INPUTDIR $TMPDIR $OUTDIR
+bsub -J"featurecountsjobarray[1-$MAXJOBS]%100" -R"select[mem>5000] rusage[mem=5000]" -M5000 -q normal -o FCoutput.%J.%I /nfs/users/nfs_t/ta6/RNASeqPipeline/5_featureCounts_wrapper.sh $ANNOTATIONgtf $NUMTHREADS $INPUTDIR $TMPDIR $OUTDIR

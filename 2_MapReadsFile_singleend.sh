@@ -8,16 +8,17 @@
 #    $2 = directory of files to map
 #    $3 = outputdirectory
 #    $4 = STAR Parameters file
-#    $5 = Prefix
+#    $5 = STAR Genome directory
+#    $6 = Prefix
 
 NUMTHREADS=$1
 FILESTOMAPDIR=$2
 OUTDIR=$3
 STAR=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/STAR-STAR_2.4.0j/bin/Linux_x86_64_static/STAR
 PARAMFILE=$4
-PREFIX="$5-$LSB_JOBINDEX-"
+PREFIX="$6-$LSB_JOBINDEX-"
 WORKINGDIR=/lustre/scratch108/compgen/team218/TA/Pipeline_RunningDir/STAR/$PREFIX
-GENOME=/lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES/Bergiers/Transcriptome
+GENOME=$5
 
 #Check appropriate arguments
 if [ ! -f "$STAR" ] ; then

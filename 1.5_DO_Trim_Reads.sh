@@ -1,9 +1,9 @@
 #!/bin/bash
 # This is just a copy of commands in 00_LIST_OF_BSUB_COMMANDS.sh so that I can run it separately from the rest of the pipeline.
 
-OUTPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/FilesQCed
+OUTPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunTrimmed
 mkdir -p $OUTPUTDIR
-INPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/FilesToMap
+INPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunDemultiplexed
 INPUTFILES=($INPUTDIR/*)
 NUMFILES=${#INPUTFILES[@]}
 MAXJOBS=$(($NUMFILES))

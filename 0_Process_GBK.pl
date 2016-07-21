@@ -56,11 +56,11 @@ while (<$ifh>) {
 $file =~ s/gbk$/gtf/;
 open (my $ofh, ">", $file) or die $!;
 foreach my $gene (sort(keys(%Items))) {
-	print $ofh "$chrname\tGBK\tgene\t".$Gene_info{$gene}->{"st"}."\t".$Gene_info{$gene}->{"end"}."\t.\t+\t.\tGeneid \"Gene$gene\"; transcript_id \"Transcript$gene\"; gene_name \"Gene$gene\"; gene_source \"GBK\";\n";
+	print $ofh "$chrname\tGBK\tgene\t".$Gene_info{$gene}->{"st"}."\t".$Gene_info{$gene}->{"end"}."\t.\t+\t.\tgene_id \"Gene$gene\"; transcript_id \"Transcript$gene\"; gene_name \"Gene$gene\"; gene_source \"GBK\";\n";
 	my $exon_num=0;
 	foreach my $exon (sort(keys(%{$Items{$gene}}))) {
 		$exon_num++;
-		print $ofh "$chrname\tGBK\texon\t$exon\t.\t+\t.\tGeneid \"Gene$gene\"; transcript_id \"Transcript$gene\"; exon_number \"$exon_num\"; gene_name \"Gene$gene\"; transcript_name \"Transcript$gene\"; gene_source \"GBK\"; exon_name \"".$Items{$gene}->{$exon}."\";\n";
+		print $ofh "$chrname\tGBK\texon\t$exon\t.\t+\t.\tgene_id \"Gene$gene\"; transcript_id \"Transcript$gene\"; exon_number \"$exon_num\"; gene_name \"Gene$gene\"; transcript_name \"Transcript$gene\"; gene_source \"GBK\"; exon_name \"".$Items{$gene}->{$exon}."\";\n";
 	}
 }
 close($ofh);
