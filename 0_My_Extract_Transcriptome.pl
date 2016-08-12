@@ -1,6 +1,28 @@
 use strict;
 use warnings;
 
+# To Do:
+# get all exons per transcript
+# sort by start
+# if overlap (start2 < end1) then merge
+# else switch to new exon
+sub merge_transcripts {
+	my @exons = sort{$a->{"st"} <=> $b->{"st"}} @_;
+	my %curr = %{shift(@exons)};
+	my @finalexons = ();
+	foreach my $exon2 (@exons) {
+		if ($curr{"end"} > $exon2->{"st"}) {
+			# overlap == merge
+			if ($exon2->{"end"} > $curr{"end"}) {
+				$curr{"end"} = $exon2->{"end"};
+			} else {
+				push(@finalexons, \%curr);
+			}
+		}
+	}
+	return(@finalexons);
+}
+
 if (@ARGV < 3) {die "0_My_Extract_Transcriptome.pl .gtf .fa Nascent?[0|1]\n";}
 
 my %Ensg2Seq = ();
