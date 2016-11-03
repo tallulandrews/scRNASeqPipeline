@@ -14,6 +14,6 @@ SALMON=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/Salmon-0.7.2_linux_x86_64/bi
 # Extract transcriptome fasta
 $GFFREAD $GTF -g $FA -w $OUTDIR/Transcripts.fasta
 
-# Build index (single thread)
-$SALMON index -i $OUTDIR/salmon_index -t $OUTDIR/Transcripts.fasta -p 1
+# Build index (single thread) for optimal mapping performance
+$SALMON index -i $OUTDIR/salmon_index -t $OUTDIR/Transcripts.fasta --perfectHash -p 1
 
