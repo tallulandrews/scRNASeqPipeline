@@ -1,13 +1,13 @@
 #!/bin/bash
 
-INPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunDedup
+INPUTDIR=/lustre/scratch108/compgen/team218/TA/Bergiers_Wafergen/BigFilesMappedDeDupped
 INPUTFILES=($INPUTDIR/*.bam)
 NUMFILES=${#INPUTFILES[@]}
 MAXJOBS=$NUMFILES
-OUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunCount
+OUTDIR=/lustre/scratch108/compgen/team218/TA/Bergiers_Wafergen/BigFilesMappedDedupedCounted
 TMPDIR=/lustre/scratch108/compgen/team218/TA/Pipeline_RunningDir/FeatureCounts
 mkdir -p $OUTDIR
-ANNOTATIONgtf="/lustre/scratch108/compgen/team218/TA/genomebuilding/Nascent_Transcripts.gtf"
+ANNOTATIONgtf="/lustre/scratch108/compgen/team218/TA/genomebuilding/Bergiers_Transcripts.gtf"
 featureCOUNT=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/subread-1.4.6-p2-Linux-x86_64/bin/featureCounts
 NUMTHREADS=1
 

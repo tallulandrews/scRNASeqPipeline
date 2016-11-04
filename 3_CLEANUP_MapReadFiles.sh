@@ -3,12 +3,12 @@
 # Run this after mapping is finished.
 
 # These must be consistent with 2_DO_MapReadsFile.sh
-OUTPUTDIR=/lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/RerunMapped
-TAG="Trimmed-Rerun_NeuronsEmmy"
+OUTPUTDIR=/lustre/scratch108/compgen/team218/TA/Bergiers_Wafergen/BigFilesMappedTranscriptome
+TAG="Trimmed50-Bergiers_Waf375"
 
 rm $OUTPUTDIR/*Log.progress.out
 
-perl /nfs/users/nfs_t/ta6/RNASeqPipeline/3_Compile_Mapping_Statistics.pl $OUTPUTDIR > /lustre/scratch108/compgen/team218/TA/NeuronsEmmyLiora/$TAG.mapped_summary.out
+perl /nfs/users/nfs_t/ta6/RNASeqPipeline/3_Compile_Mapping_Statistics.pl $OUTPUTDIR > /lustre/scratch108/compgen/team218/TA/Bergiers_Wafergen/$TAG.mapped_summary.out
 
 tar -cvzf $OUTPUTDIR/$TAG.ParameterLogfiles.tar.gz  $OUTPUTDIR/*Log.out
 tar -cvzf $OUTPUTDIR/$TAG.SpliceJunctionfiles.tar.gz  $OUTPUTDIR/*SJ.out.tab

@@ -16,7 +16,6 @@ OUTDIR=$3
 INFILE=$4
 ANNFILE=$5
 SALMON=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/Salmon-0.7.2_linux_x86_64/bin/salmon
-LSB_JOBINDEX=1 #Tmp for testing
 
 #Check appropriate arguments
 if [ ! -f "$SALMON" ] ; then

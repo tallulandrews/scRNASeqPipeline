@@ -1,6 +1,7 @@
 This is a collection of scripts I use (or have used in the past) to process scRNASeq data. They are free to use by anyone else for any purpose, but come with no assurances or guarantees of correctness or functionality. The general workflow is as follows:
 
 0 : Create the appropriate genome for the dataset, and obtain the read files & initial QC
+	- Building mapping indexes generally requires ~30Gb of memory for a mouse-sized genome
 1 : Split the files by well (cell), Trim reads as appropriate based on QC
 2 : Map the reads to the genome
 3 : Clean up mapping output & remove duplicates
