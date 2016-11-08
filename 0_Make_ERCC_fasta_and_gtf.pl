@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-# Converts the Annotation file from 
+# Converts the Annotation file from https://www.thermofisher.com/order/catalog/product/4456740 to gtf and fasta files that can be added to existing genome fasta & gtf files.
 
 my @FASTAlines = ();
 my @GTFlines = ();

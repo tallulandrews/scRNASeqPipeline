@@ -69,7 +69,7 @@ if [ ! -d "$OUTDIR/$LSB_JOBINDEX" ] ; then
 fi
 
 # Run SALMON 
-$SALMON quant -i $INFILE -o $OUTDIR/$LSB_JOBINDEX -1 $FILE1TOMAP -2 $FILE2TOMAP -p $NUMTHREADS -l A -g $ANNFILE --seqBias --gcBias -q
+$SALMON quant -i $INFILE -o $OUTDIR/$LSB_JOBINDEX -1 $FILE1TOMAP -2 $FILE2TOMAP -p $NUMTHREADS -l A -g $ANNFILE --seqBias --gcBias --posBias -q
 mv $OUTDIR/$LSB_JOBINDEX/quant.sf $OUTDIR/$NAME.quant.sf
 mv $OUTDIR/$LSB_JOBINDEX/quant.genes.sf $OUTDIR/$NAME.quant.genes.sf
 rm -r $OUTDIR/$LSB_JOBINDEX
