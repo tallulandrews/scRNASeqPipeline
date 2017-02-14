@@ -1,9 +1,12 @@
 use strict;
 use warnings;
 
-if (@ARGV < 1) {die "Required Argument: output from Check_Barcodes.pl\n";}
+if (@ARGV < 2) {die "Required Argument: Barcode counting output, expected number of cells\n";}
 
-open(my $ifh, $ARGV[0]) or die $!;
+my $ExpectNCells = $ARGV[1]; # This is just used as a guide does not have to be exact.
+my $trunc = 1; #Only output the identified cell IDs.
+
+open(my $ifh, $ARGV[0]) or die $!; # list of the form: barcode frequencey; in decending order of frequency.
 my %Barcodes = ();
 
 my $count = 0;
@@ -27,8 +30,16 @@ while(<$ifh>) {
 }
 
 my @codes = sort{$Barcodes{$a}<=>$Barcodes{$b}} keys(%Barcodes);
-foreach my $code (@codes) {
-	print "$code ".$Barcodes{$code}."\n";
-}
+my $quantile = $ExpectNCells*0.75;
+my $quantile_freq = $Barcodes{$codes[$quantile]};
+my $threshold = $quantile_freq - ($Barcodes{$codes[0]}-$quantile_freq);
 
-	
+my $count = 0;
+foreach my $code (@codes) {
+	if ($Barcodes{$code} < $threshold) {
+		print STDERR "$count cell barcodes found.\n"
+		if ($tunct) {last;}
+	}
+	print "$code ".$Barcodes{$code}."\n";
+	$count++;
+}

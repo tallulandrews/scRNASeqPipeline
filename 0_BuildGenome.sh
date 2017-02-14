@@ -4,7 +4,7 @@
 # Tallulah 07 April 2015 - added the option to just keep the GTF & Fasta files without running STAR by setting the number of threads to 0 (for getting the genome & annotations for Cufflinks later).
 # Tallulah 31 March 2015 - updated to check all 5/6 arguments (which are required) have been set.
 # Tallulah 26 Mar 2015 Not so obvious whether it is more efficient to get genomes from internal ensembl mirror or to download from ensembl ftp website? -> since only doing this once per organism/experiment ftp/rsync is probably fine?
-# All bits tested but not all at once
+# All bits tested but not all at once - Totally works now (13 Dec 2016)
 
 # Arguments: 
 #    $1 = working directory on /lustre/
@@ -111,7 +111,7 @@ fi
 
 if [ $NUMTHREADS -gt 0 ] ; then
   # Step 3: Run STAR on the finished genome & put output in striped directory.
-  $STAR --runThreadN $NUMTHREADS --runMode genomeGenerate --genomeDir /lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES --genomeFastaFiles $FA --sjdbGTFfile $GTF --sjdbOverhang $OVERHANG --limitGenomeGenerateRAM 30000000000
+  $STAR --runThreadN $NUMTHREADS --runMode genomeGenerate --genomeDir /lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES --genomeFastaFiles $FA --sjdbGTFfile $GTF --sjdbOverhang $OVERHANG --limitGenomeGenerateRAM 31000000000
 
   # Step 4: delete the Ensembl-derived files
 #  rm $FA
