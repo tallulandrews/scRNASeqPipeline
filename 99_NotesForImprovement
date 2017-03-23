@@ -1,0 +1,6 @@
+Is it better to use SAMtools after mapping to sort BAM file or to have STAR sort the BAMs before writing them? (Probably the latter since less I/O) -> then just merge the sorted files using samtools (merge expects sorted bams anyway)
+
+Streaming FASTQC made Java crash but this didn't halt the job which is problematic (eventually was killed because job time limit was exceeded). Need to increase efficiency. 
+-> worked fine when increased memory to 10 Gb and ran on each end of each lane.
+
+Samtools sort on largest BAM took 104 sec and 200MB of memory on the cluster. Need to do some finicky stuff to get it to run as a job array though (or should I just send them as individual jobs? only 192 of them...). 

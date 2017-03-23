@@ -111,7 +111,7 @@ fi
 
 if [ $NUMTHREADS -gt 0 ] ; then
   # Step 3: Run STAR on the finished genome & put output in striped directory.
-  $STAR --runThreadN $NUMTHREADS --runMode genomeGenerate --genomeDir /lustre/scratch108/compgen/team218/TA/STRIPED_GENOMES --genomeFastaFiles $FA --sjdbGTFfile $GTF --sjdbOverhang $OVERHANG --limitGenomeGenerateRAM 31000000000
+  $STAR --runThreadN $NUMTHREADS --runMode genomeGenerate --genomeDir /lustre/scratch117/cellgen/team218/TA/STRIPED_GENOMES --genomeFastaFiles $FA --sjdbGTFfile $GTF --sjdbOverhang $OVERHANG --limitGenomeGenerateRAM 31000000000
 
   # Step 4: delete the Ensembl-derived files
 #  rm $FA
