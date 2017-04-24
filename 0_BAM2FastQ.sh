@@ -16,7 +16,7 @@ FASTQ2=$( basename $FILE )_2.fastq
 
 if [ ! -f $FASTQ1.gz ] || [ ! -f $FASTQ2.gz ] ; then
 
-	#Get upmapped reads and write to fastq
+	#write all reads to fastq
 	TMP=Tmp$LSB_JOBINDEX.bam
 	TMP2=Tmp2_$LSB_JOBINDEX.bam
 	$SAMTOOLS sort -n $FILE -o $TMP
