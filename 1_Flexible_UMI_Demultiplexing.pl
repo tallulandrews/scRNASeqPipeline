@@ -6,33 +6,44 @@ use warnings;
 # Allows barcodes to contain ambiguous bases
 # Allows trailing bases at the end of the barcode sequence but requires barcodes to begin from the first base in the barcode sequence.
 
-if (@ARGV < 6) { die "Usage: 1_Flexible_UMI_Demultiplexing.pl BarcodeFastq ReadFastq BarcodeStructure(C=cellbarcodebase, U=UMIbase) BarcodeIndexFile(\"UNKNOWN\" triggers counting reads with every unique barcode) BarcodeColumn(0=first column) OutputPrefix AdaptorFasta(optional)\n";}
+if (@ARGV != 6) { 
+print STDERR "perl 1_Flexible_UMI_Demultiplexing.pl read1.fq read2.fq b_structure index mismatch prefix\n";
+print STDERR "
+		read1.fq : barcode/umi containing read
+		read2.fq : non-barcode containing read
+		b_structure : a single string of the format C##U# or U#C## 
+			where C## is the cell-barcode and U# is the UMI.
+			e.g. C10U4 = a 10bp cell barcode followed by a 4bp UMI
+		index : file containg a single column of expected cell-barcodes.
+			if equal to \"UNKNOWN\" script will output read counts for each unique barcode.
+		mismatch : maximum number of permitted mismatches (recommend 2)
+		prefix : prefix for output fastq files.\n";
+exit(1);}
 my $infile1 = $ARGV[0];
 my $infile2 = $ARGV[1];
 my $barcodestructure = $ARGV[2];
+my $MAXmismatch = $ARGV[4];
 
 # Parse Barcode Structure #
 
-$barcodestructure =~ s/[^CU]//g;
 
-print "$barcodestructure\n";
 
 my $order = -1;
 my $C_len = -1;
 my $U_len = -1;
 
-if ($barcodestructure =~ /^(C+)(U+)$/) {
+if ($barcodestructure =~ /^C(\d+)U(\d+)$/) {
 	$order=1;
-	$C_len = length($1);
-	$U_len = length($2);
+	$C_len = $1;
+	$U_len = $2;
 	print "Barcode Structure: $C_len bp CellID followed by $U_len bp UMI\n";
-} elsif ($barcodestructure =~ /^(U+)(C+)$/) {
+} elsif ($barcodestructure =~ /^U(\d+)C(\d+)$/) {
 	$order = 0;
-	$C_len = length($2);
-	$U_len = length($1);
+	$C_len = $2;
+	$U_len = $1;
 	print "Barcode Structure: $U_len bp UMI followed by $C_len bp CellID\n";
 } else {
-	die "Intermingled cell & umi barcodes are not supported\n";
+	die "$barcodestructure not recognized.\n";
 }
 # ----------------------- #
 
@@ -49,14 +60,11 @@ my %CellBarcodes = ();
 my %ofhs = ();
 if ($ARGV[3] ne "UNKNOWN") {
 	open (my $ifh, $ARGV[3]) or die "Cannot open $ARGV[3]\n";
-	<$ifh>; # header
-	my $column = $ARGV[4];
 	my $index=1;
 	while (<$ifh>) {
 		chomp;
 		if ($_ =~/^#/) {next;}
-		my @record = split(/\s+/);
-		my $barcode = $record[$column];
+		my $barcode = $_;
 		$CellBarcodes{$barcode} = $index;
 		open(my $fh,'>',"$OUTprefix\_$barcode.fq") or die $!;
 		$ofhs{$index} = $fh;
@@ -65,20 +73,6 @@ if ($ARGV[3] ne "UNKNOWN") {
 }
 # --------------------------- #
 
-# Read Adaptor Fasta #
-my @Adaptors = ();
-if (defined($ARGV[6])) {
-	open (my $afh, $ARGV[6]) or die $!;
-	while (<$afh>) {
-		if ($_ =~ /^>/) {
-			my $seq = <$afh>;
-			chomp($seq);
-			push(@Adaptors, $seq);
-		}
-	} close($afh);
-}
-# ------------------ #
-		
 
 ### Process Reads ###
 
@@ -87,8 +81,7 @@ my $NotProperBarcodes = 0;
 my $NotPossibleCell = 0;
 my $AmbiguousCell = 0;
 my $ExactMatch = 0;
-my $Mismatch1 = 0;
-my $Mismatch2 = 0;
+my $Mismatch = 0;
 my $BadUMI = 0;
 my $total_reads = 0;
 my $OutputReads=0;
@@ -103,8 +96,10 @@ while(<$ifh1>) {
 		# Ensure matching pair of reads
 		my @thing1 = split(/\s+/,$file1line);
 		my @thing2 = split(/\s+/,$file2line);
+		#my $readname1 = chop($thing1[0]);
+		#my $readname2 = chop($thing2[0]);
+		#if ($readname1 ne $readname2) {die "file1 & file2 readnames don't match! $thing1[0] $thing2[0]\n";}
 		my $readname = $thing1[0];
-		if ($readname ne $thing2[0]) {die "file1 & file2 readnames don't match! $readname $thing2[0]\n";}
 		my $barcodes = <$ifh1>;
 		my $read = <$ifh2>;
 		$total_reads++;
@@ -142,7 +137,7 @@ while(<$ifh1>) {
 				} else {
 					if (scalar(@matches == 0)) { # Count mismatches
 						my $count = ( $barcode ^ $CellID ) =~ tr/\0//;
-						if ($count >= length($barcode)-2) { # Allow upto 2 mismatches
+						if ($count >= length($barcode)-$MAXmismatch) { # Allow upto 2 mismatches
 							$close{$barcode} = $count;
 						}
 					}
@@ -160,12 +155,7 @@ while(<$ifh1>) {
 			}
 			if (scalar(@matches) == 1) { # single best match
 				$CellID = $matches[0];
-				if ($mismatches == 2) {
-					$Mismatch2++;
-				}
-				if ($mismatches == 1) {
-					$Mismatch1++;
-				}
+				$Mismatch++;
 			} elsif (scalar(@matches) > 1) { #More than one equally good match
 				$AmbiguousCell++;
 				next;
@@ -178,23 +168,6 @@ while(<$ifh1>) {
 		} 
 
 		} #If known barcodes
-
-		# UMI filter
-
-		# All As or All Ts with 2 mismatches - No I think >80% A or T is a better definition since short UMIs quite likely to get real A/T rich UMIs
-		my $As_in_UMI = () = $UMI =~ /A/g;	
-		my $Ts_in_UMI = () = $UMI =~ /T/g;	
-		if ($As_in_UMI >= length($UMI)*0.8 || $Ts_in_UMI >= length($UMI)*0.8) {
-			$BadUMI++; next;
-		}
-		# UMI contained in adaptor sequence - Don't need UMI length limit here since just don't provide adaptor sequences for short UMI datasets.
-		if (scalar(@Adaptors) > 0) {
-			foreach my $adapt (@Adaptors) {
-				if ($adapt =~ /$UMI/) {
-					$BadUMI++; next;
-				}
-			}
-		}
 
 		if ($ARGV[3] ne "UNKNOWN") {
 			# Has Acceptable Barcode
@@ -211,13 +184,10 @@ while(<$ifh1>) {
 }
 if ($ARGV[3] ne "UNKNOWN") {
 	print STDERR "
-	Not valid read: $NotProperBarcodes
 	Doesn't match any cell: $NotPossibleCell
 	Ambiguous: $AmbiguousCell
 	Exact Matches: $ExactMatch
-	One mismatch: $Mismatch1
-	Two mismatch: $Mismatch2
-	Bad UMI: $BadUMI
+	Contain mismatches: $Mismatch
 	Input Reads: $total_reads
 	Output Reads: $OutputReads\n";
 	close($ifh1);

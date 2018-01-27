@@ -8,7 +8,18 @@ use warnings;
 # This should work equally well for single-end reads and can take any number of files as arguments.
 # TESTED
 
-if (@ARGV != 7) { die "Breakdown_Paired_Ends.pl barcode_read1.fastq read2.fastq barcode_pos[start|end] barcode_length BarcodeIndexFile MaxMisMatches OutputPrefix\n";}
+if (@ARGV != 7) { 
+	print STDERR "perl 1_Flexible_FullTranscript_Demultiplexing.pl read1.fq read2.fq b_pos b_len index mismatch prefix\n";
+	print STDERR "
+		read1.fq : barcode containing read
+		read2.fq : non-barcode containg read
+		b_pos : position of cell-barcode in the read. [\"start\" or \"end\"]
+		b_len : length of cell-barcode (bp)
+		index : file contain a single column of expected barcodes
+		mismatch : maximum number of permitted mismatches (recommend 2)
+		prefix : prefix for output fq files.\n";
+	exit(1);
+}
 
 my $infile1 = $ARGV[0];
 my $infile2 = $ARGV[1];
@@ -58,7 +69,7 @@ while(<$ifh1>) {
 		my @thing1 = split(/\s+/, $file1line);
 		my @thing2 = split(/\s+/, $file2line);
 		my $readname = $thing1[0];
-		if ($readname ne $thing2[0]) {die "file1 & file2 readnames don't match!\n";}
+		#if ($readname ne $thing2[0]) {die "file1 & file2 readnames don't match!\n";}
 		my $barcode_read = <$ifh1>;
 		chomp $barcode_read;
 		my $read2 = <$ifh2>;
@@ -71,7 +82,7 @@ while(<$ifh1>) {
 		my $file2qual = <$ifh2>;
 		chomp $file2qual;
 		my $CellID = "";
-		if ($barcode_pos == "start") {
+		if ($barcode_pos eq "start") {
 			$CellID = substr($barcode_read, 0, $barcode_len, "");
 			substr($file1qual, 0, $barcode_len, "");
 		} else {
