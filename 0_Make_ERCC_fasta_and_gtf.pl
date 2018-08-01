@@ -1,10 +1,14 @@
+#!/usr/local/bin/perl
 use strict;
 use warnings;
 # Converts the Annotation file from https://www.thermofisher.com/order/catalog/product/4456740 to gtf and fasta files that can be added to existing genome fasta & gtf files.
+if (@ARGV != 1) {die "Usage: 0_Make_ERCC_fasta_and_gtf.pl <ERCC Annotation file>";}
+
+$file = $ARGV[0]; #ERCC_Controls_Annotation.txt
 
 my @FASTAlines = ();
 my @GTFlines = ();
-open (my $ifh, "ERCC_Controls_Annotation.txt") or die $!;
+open (my $ifh, $file) or die $!;
 <$ifh>; #header
 while (<$ifh>) {
 	# Do all the important stuff

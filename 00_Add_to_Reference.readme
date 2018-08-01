@@ -1,0 +1,24 @@
+This provides instructions for adding extra sequences to a reference genome 
+prior to mapping your reads. Reasons for doing this would be:
+	1) if your celline contains inserted genetic contructs, 
+		e.g. for CRISPR, or for fluorescently labelling your cells. 
+	2) if you've added spike-in transcripts to your sample.
+
+1) This will require manually creating the GTF annotations for your 
+	particular construct. If you have a GenBank file (.gbk) you can use:
+	0_GBK2FASTA.pl
+	to extract the raw sequence of the construct to append to the genome.
+
+2) If using the ERCC spike in, you must download the sequences from the 
+	manufacturer, i.e. the "ERCC Controls Annotation" file from: 
+	https://www.thermofisher.com/order/catalog/product/4456740
+	then run:
+	0_Make_ERCC_fasta_and_gtf.pl ERCC_Controls_Annotation.txt
+	this will create a fasta and gtf file for the ERCCs in your working 
+	directory which you can append to the reference genome.
+
+Append your extra gtf and fasta files to the existing reference fasta and gtf using "cat" :
+cat ERCC_Controls.fa >> ref.fa
+cat ERCC_Controls.gtf >> ref.gtf
+
+
