@@ -1,0 +1,89 @@
+This file contains instructions for converting a variety of file-types to
+a fastq files. This is necessary before running any of the quantification 
+pipelines found here.
+
+There are many different ways you could recieve data from a sequencing 
+facility and not all of them will be covered here. These scripts will
+only cover the different formats I've had to deal with so far.
+
+Software Requirements:
+samtools (>=1.3.1)
+bedtools2
+
+
+Option 1 : CRAM/BAM files
+	First inspect your CRAM/BAM files using:
+
+	samtools view -h file1.cram | less
+	
+	Among the header lines (start with "@" symbol) you should find 
+	some information identifying the data as belonging to your study
+	along with any processing that has been done (e.g. how it was 
+	mapped to the genome and which genome it was mapped to)
+
+	Once you scroll down to reads (press <enter>/<space> to scroll)
+	you can check whether they have been mapped or not. Unmapped 
+	reads will have the second entry of each row be either 77 or 141.
+
+	Usually BAM/CRAM files will already be demultiplexed (one file per 
+	cell) and mapped to the appropriate genome. In which case, you may
+	choose to skip the mapping step yourself and simply count your
+	already mapped reads (see : 00_STAR_For_SmartSeq.readme). In which
+	case if you have BAM files you are done. If you have CRAM files you
+	need to convert them to BAM files:
+
+	samtools view -b -h file.cram -o file.bam
+
+	NOTE: Converting mapped CRAM files to BAM files will store the 
+	entire reference genome in your cache (which might be bad). To
+	specify a new cache location use:
+
+	export REF_CACHE=<full path to new cache location>
+
+	If you have a large number of files to convert you may want to 
+	loop over them or submit them to a cluster to run. E.g.
+
+	bsub -J"arrayjob[1-$NCELLS]%50" -R"select[mem>1000] rusage[mem=1000]" -M1000 -o cram2bam.%J.%I 0_CRAM2BAM.sh cram_dir bam_dir work_dir
+	
+	or
+
+	CRAM_files=$CRAM_dir/*.cram
+	for FILE in $CRAM_files
+	do
+	  0_CRAM2BAM.sh $FILE bam_dir work_dir
+	done
+
+	If for whatever reason you need to remap your reads from BAM/CRAM files
+	then you'll need to convert the BAM files to FastQ files, using :
+	
+	bsub -J"arrayjob[1-$NCELLS]%50" -R"select[mem>1000] rusage[mem=1000]" -M1000 -o bam2fastq.%J.%I 0_BAM2FastQ.sh bam_dir fastq_dir work_dir
+
+	or
+
+	BAM_files=$BAM_dir/*.bam
+        for FILE in $BAM_files
+        do
+          0_BAM2Fastq.sh $FILE fastq_dir work_dir
+        done
+
+Option 2 : Demultiplexing large FastQs
+	If you get data where reads from multiple cells are mixed together then
+	you will need to demultiplex the data so you have one pair of fastq files
+	per cell. This can be done with :
+
+	perl 1_Flexible_FullTranscript_Demultiplexing.pl read1.fq read2.fq b_pos b_len index mismatch prefix
+
+	Running the script without any arguments will bring up the help for 
+	what each argument should be. Note this script assumes you have a 
+	relatively small number of possible cell-barcodes (i.e. < 5,000).
+	It is not appropriate for droplet or microwell based experiments.
+
+	Cell barcodes are assumed to be present at either the start of end of 
+	read1. And they will be removed from the sequences after demultiplexing.
+
+	If you have multiple files of reads per cell (e.g. if you have multiple 
+	lanes of sequencing) then these can be combined with the "cat" function:
+	
+	cat file1_1.fq file2_1.fq file3_1.fq > all_1.fq
+
+	It is easist to combine all reads into one file and then demultiplex.

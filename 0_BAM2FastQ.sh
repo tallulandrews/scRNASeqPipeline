@@ -1,33 +1,57 @@
 #!/bin/bash
 # Convert BAM file to paired, zipped, read files. Assumes paired-end sequencing
-# Designed for LSF job-arrays
+BAM_file=$1
+OUT_dir=$2
+WORK_dir=$3
 
-INPUTDIR=$1
-OUTDIR=$2
-#LSB_JOBINDEX=$3 # specify which file to run on
-
-export REF_CACHE=/lustre/scratch117/cellgen/team218/TA/TemporaryFileDir
-FILEStoMAP=($INPUTDIR/*.bam)
-ARRAYINDEX=$(($LSB_JOBINDEX-1))
-FILE=${FILEStoMAP[$ARRAYINDEX]}
+export REF_CACHE=$WORK_dir
 SAMTOOLS=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/CRAM/samtools-1.3.1/samtools
 BEDTOOLS=/nfs/users/nfs_t/ta6/RNASeqPipeline/software/bedtools2/bin/bedtools
-FASTQ1=$( basename $FILE )_1.fastq
-FASTQ2=$( basename $FILE )_2.fastq
 
-if [ ! -f $OUTDIR/$FASTQ1.gz ] || [ ! -f $OUTDIR/$FASTQ2.gz ] ; then
+USAGE="Usage: 0_BAM2FastQ.sh bam_file out_dir work_dir\n
+	Assumes paired-end reads.
+	\tArguments:\n
+		\tbam_file = BAM file or directory of BAM files if running in job array\n
+		\tout_dir = directory for FastQ files\n
+		\twork_dir = fast I/O location with space to store genome\n"
 
-	#write all reads to fastq
-	TMP=Tmp$LSB_JOBINDEX.bam
-	TMP2=Tmp2_$LSB_JOBINDEX.bam
-	$SAMTOOLS sort -n $FILE -o $TMP
-	$SAMTOOLS view -b -F 256 $TMP -o $TMP2
-	$BEDTOOLS bamtofastq -i $TMP2 -fq $OUTDIR/$FASTQ1 -fq2 $OUTDIR/$FASTQ2
-	
-
-	gzip $OUTDIR/$FASTQ1
-	gzip $OUTDIR/$FASTQ2
-	rm $TMP
-	rm $TMP2
-
+if [ -z $BAM_file ] || [ -z $BAM_dir ] || [ -z $WORK_dir ] ; then
+  echo -e $USAGE
+  exit 1
 fi
+
+if [ ! -f $SAMTOOLS ] ; then
+  echo "$SAMTOOLS not available"
+  exit 1
+fi
+
+if [ ! -f $BEDTOOLS ] ; then
+  echo "$BEDTOOLS not available"
+  exit 1
+fi
+
+# Get CRAM files
+if [ ! -z $LSB_JOBINDEX ]; then
+  BAMS=($BAM_file/*.bam)
+  INDEX=$(($LSB_JOBINDEX-1))
+  FILE=${BAMS[$INDEX]}
+else
+  FILE=$BAM_file
+fi
+
+NAME=`basename ${FILE%.bam}` # remove path and .bam suffix
+
+FASTQ1=${NAME}_1.fq
+FASTQ2=${$NAME}_2.fq
+
+#write all reads to fastq
+TMP=$WORK_dir/Tmp$NAME.bam
+TMP2=$WORK_dir/Tmp2_$NAME.bam
+$SAMTOOLS sort -n $FILE -o $TMP
+$SAMTOOLS view -b -F 256 $TMP -o $TMP2 # remove secondary alignments
+$BEDTOOLS bamtofastq -i $TMP2 -fq $OUT_dir/$FASTQ1 -fq2 $OUT_dir/$FASTQ2
+
+gzip $OUT_dir/$FASTQ1
+gzip $OUT_dir/$FASTQ2
+rm $TMP
+rm $TMP2
