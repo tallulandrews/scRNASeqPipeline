@@ -56,15 +56,23 @@ Option 1 : CRAM/BAM files
 	If for whatever reason you need to remap your reads from BAM/CRAM files
 	then you'll need to convert the BAM files to FastQ files, using :
 	
-	bsub -J"arrayjob[1-$NCELLS]%50" -R"select[mem>1000] rusage[mem=1000]" -M1000 -o bam2fastq.%J.%I 0_BAM2FastQ.sh bam_dir fastq_dir work_dir
+	bsub -J"arrayjob[1-$NCELLS]%50" -R"select[mem>1000] rusage[mem=1000]" -M1000 -o bam2fastq.%J.%I 0_BAM2FastQ.sh bam_dir fastq_dir work_dir "P"
 
 	or
 
 	BAM_files=$BAM_dir/*.bam
         for FILE in $BAM_files
         do
-          0_BAM2Fastq.sh $FILE fastq_dir work_dir
+          0_BAM2FastQ.sh $FILE fastq_dir work_dir "P"
         done
+
+	This script assumes reads are unpaired unless the fourth argument "P" is provided. 
+
+	To check if your reads are pairs simply run this command:
+
+	samtools view -f 1 my_file.bam | wc -l 
+
+	This will count the number of paired reads in your bam file.
 
 Option 2 : Demultiplexing large FastQs
 	If you get data where reads from multiple cells are mixed together then

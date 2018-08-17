@@ -8,3 +8,11 @@ This is a collection of scripts I use (or have used in the past) to process scRN
 4 : Mapping QC
 5 : Quantify expression
 6 : Assemble expression matrix
+
+Finished Pipelines:
+00_Kallisto_For_SmartSeq.readme = Smartseq2 + Kallisto (no UMIs) 
+
+
+Brief Descriptions of Useful files:
+0_Extract_barcodes_from_BAM.sh : open the first line of each BAM file and find the barcode (tagged with BC:) - for matching up metadata.
+

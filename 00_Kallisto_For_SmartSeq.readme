@@ -1,0 +1,91 @@
+This outlines the scripts, software and steps for processing a 
+SmartSeq[2]-based RNASeq experiment with Kallisto. It assumes 
+you are starting with one pair of FastQ files per cell, and
+takes you through to creating a Single-Cell Experiment object.
+
+See: 00_Generate_FastQs.readme for instructions on creating one
+pair of FastQs per cell.
+
+This workflow assumes you are NOT using Unique Molecular Identifiers
+
+Software Requirements:
+fastqc
+trimmomatic
+gffread
+kallisto
+perl
+
+All scripts contain variables among the top few lines for hard-coding specific
+versions of the software if it is not in your path. 
+
+Directory Set-up:
+(A) Create one directory with all the FastQ files for one experiment.
+(B) Create a second directory for kallisto output files.
+(C) Create a third directory for temporary files.
+
+SAVE A BACK-UP COPY OF YOUR RAW DATA BEFORE RUNNING
+
+Steps
+
+1 : Build the reference transcriptome and kallisto index
+
+Download the appropriate reference fasta (.fa) and annotation (.gtf) files
+(https://www.ensembl.org/info/data/ftp/index.html)
+
+Add any custom sequences you need for your experiment.
+
+See: 00_Add_to_Reference.readme for instructions on adding custom sequences 
+     such as spike-ins to the reference.
+
+Run : "Kallisto_Build_Index.sh ref.fa ref.gtf outdir"
+
+2 : Read Quality Control with FASTQC
+
+Download my FASTQC limit file (0_FASTQC_limits.txt) 
+
+Run : 
+0_FASTQC_Streaming.sh fastq_dir "*_1.fq" 0_FASTQC_limits.txt "Read1" outdir
+0_FASTQC_Streaming.sh fastq_dir "*_2.fq" 0_FASTQC_limits.txt "Read2" outdir
+
+If your data was sequenced on multiple lanes of sequences you may want to run 
+FASTQC on each lane separately. 
+
+3 : Read Trimming (WARNING: replaces original FastQs)
+Either submit 1.5_Trim_Reads_Paired.sh as a job array:
+
+NCELLS=384
+bsub -J"arrayjob[1-$NCELLS]%50" -R"select[mem>1000] rusage[mem=1000]" -M1000 -q normal -o trim.out.%J.%I 1.5_Trim_Reads_Paired.sh $FQ_dir NULL $work_dir NexteraPE-PE.fa 1000
+
+or loop over all pairs of fastq files :
+
+NCELLS=384
+FQ_files=($FQ_dir/*.fq.gz)
+for CELL in $(seq 1 $NCELLS)
+do
+  FILE_INDEX=$((($CELL-1)*2))
+  FILE1=${FQ_files[$FILE_INDEX]}
+  FILE2=${FQ_files[$FILE_INDEX+1]}
+  bsub -R"select[mem>1000] rusage[mem=1000]" -M1000 -q normal -o trim.out.%J 1.5_Trim_Reads_Paired.sh $FILE1 $FILE2 $work_dir NexteraPE-PE.fa 1000
+done
+
+4 : Quantification with kallisto
+Either submit Kallisto_Quantification_Wrapper.sh as a job array:
+
+NCELLS=384
+bsub -J"arrayjob[1-$NCELLS]%50" -R"select[mem>5000] rusage[mem=5000] span[hosts=1]" -M5000 -n2 -q normal -o kallisto.out.%J.%I Kallisto_Quantification_Wrapper.sh $FQ_dir NULL kallisto_index.idx 2 outdir
+
+or loop over all pairs of fastq files :
+
+NCELLS=384
+FQ_files=($FQ_dir/*.fq.gz)
+for CELL in $(seq 1 $NCELLS)
+do
+  FILE_INDEX=$((($CELL-1)*2))
+  FILE1=${FQ_files[$FILE_INDEX]}
+  FILE2=${FQ_files[$FILE_INDEX+1]}
+  bsub -R"select[mem>5000] rusage[mem=5000] span[hosts=1]" -M5000 -n2 -q normal -o kallisto.out.%J.%I Kallisto_Quantification_Wrapper.sh $FILE1 $FILE2 kallisto_index.idx 2 outdir
+done
+
+5 : Combine results with perl script
+"Kallisto_Make_ExpMat.pl kallisto_dir ref.gtf [gene|trans] out_prefix"
+
